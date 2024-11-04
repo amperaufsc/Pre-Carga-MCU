@@ -31,8 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define ACC 160.0  // Valor do acumulador
-#define INV 143.0   // Valor do inversor
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -41,11 +40,22 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-CAN_HandleTypeDef hcan;
 
 /* USER CODE BEGIN PV */
-	float limite;
-	float TINV;
+CAN_HandleTypeDef hcan;
+HAL_StatusTypeDef hal_status;
+
+CAN_TxHeaderTypeDef txheader;
+CAN_RxHeaderTypeDef rxheader;
+uint8_t txdata[8];
+uint8_t rxdata[8];
+uint32_t txmailbox;
+HAL_StatusTypeDef get_status;
+
+uint16_t accumuladorVoltage;
+uint8_t inversorVoltage;
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -58,7 +68,28 @@ static void MX_CAN_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+	get_status = HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxheader, rxdata);
+	if(get_status == HAL_OK){
 
+		switch(rxheader.StdId){
+
+		case 0x673: // Voltagem do Acumulador
+				accumuladorVoltage = ((rxdata[0] << 8) | (rxdata[1]));
+				break;
+
+		case 0x046: // Voltagem do Inversor
+						inversorVoltage = ((rxdata[1] << 8 ) | (rxdata[0]));
+						break;
+
+
+
+
+		}
+
+	}
+}
 /* USER CODE END 0 */
 
 /**
@@ -69,7 +100,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	limite = ACC*0.9;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -93,28 +124,39 @@ int main(void)
   MX_CAN_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_CAN_Start(&hcan);
+
+  HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET){
-		  TINV = INV + 1;
+	  txheader.IDE = CAN_ID_STD;
+	  txheader.RTR = CAN_RTR_DATA;
+	  txheader.StdId = 14;
+	  txheader.DLC = 1;
+	  txdata[0] = 10;
+	  if(HAL_CAN_AddTxMessage(&hcan, &txheader, txdata, &txmailbox) != HAL_OK){
+		  Error_Handler();}
+
+	  if(accumuladorVoltage == (0.9*inversorVoltage)){
+		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, SET);
+		  HAL_Delay(1000);
+		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, RESET);
+		  HAL_Delay(1000);
+
+	  }
 	  }
 
-	  if(TINV >= limite){
-	  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5, SET);
-	  HAL_Delay(1000);
-	  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5, RESET);
-	  HAL_Delay(1000);
-	  }
-	  else HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, SET);
+
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+
   /* USER CODE END 3 */
 }
 

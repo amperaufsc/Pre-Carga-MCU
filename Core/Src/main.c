@@ -31,7 +31,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define RELAY_FIRST_PIN GPIO_PIN_6
+#define RELAY_SECOND_PIN GPIO_PIN_7
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -69,8 +70,13 @@ static void MX_CAN_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
+	HAL_GPIO_WritePin(GPIOA, RELAY_SECOND_PIN, RESET); //Garante que o Relé direto do acumulador está aberto//
+	HAL_Delay(10);
+	HAL_GPIO_WritePin(GPIOA, RELAY_FIRST_PIN, SET); // Ativa o Relé da Pré-Carga//
+
 	get_status = HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxheader, rxdata);
 	if(get_status == HAL_OK){
 
@@ -143,12 +149,11 @@ int main(void)
 	  if(HAL_CAN_AddTxMessage(&hcan, &txheader, txdata, &txmailbox) != HAL_OK){
 		  Error_Handler();}
 
-	  if(accumuladorVoltage == (0.9*inversorVoltage)){
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, SET);
-		  HAL_Delay(1000);
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, RESET);
-		  HAL_Delay(1000);
 
+	  if(accumuladorVoltage == (0.9*inversorVoltage)){
+		  HAL_GPIO_WritePin(GPIOA, RELAY_FIRST_PIN, RESET); //Abre o relé da pré-carga//
+		  HAL_Delay(10);
+		  HAL_GPIO_WritePin(GPIOA, RELAY_SECOND_PIN, SET); //Fecha o relé direto do acumulador para o inversor//
 	  }
 	  }
 

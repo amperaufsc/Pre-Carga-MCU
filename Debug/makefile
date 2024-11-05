@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := Codigo Comp
+BUILD_ARTIFACT_NAME := Codigo CAN
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-Codigo\ Comp.elf \
+Codigo\ CAN.elf \
 
 MAP_FILES += \
-Codigo\ Comp.map \
+Codigo\ CAN.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-Codigo\ Comp.list \
+Codigo\ CAN.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: Codigo\ Comp.elf secondary-outputs
+main-build: Codigo\ CAN.elf secondary-outputs
 
 # Tool invocations
-Codigo\ Comp.elf Codigo\ Comp.map: $(OBJS) $(USER_OBJS) C:\Users\Mari\STM32CubeIDE\workspace_1.16.1\Codigo\ Comp\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Codigo Comp.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\Mari\STM32CubeIDE\workspace_1.16.1\Codigo Comp\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Codigo Comp.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Codigo\ CAN.elf Codigo\ CAN.map: $(OBJS) $(USER_OBJS) C:\Users\Mari\Documents\GitHub\Pre-Carga-MCU\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Codigo CAN.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\Mari\Documents\GitHub\Pre-Carga-MCU\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Codigo CAN.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-Codigo\ Comp.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Codigo Comp.list"
+Codigo\ CAN.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Codigo CAN.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) Codigo\ Comp.elf Codigo\ Comp.list Codigo\ Comp.map Codigo\\ Comp.elf default.size.stdout
+	-$(RM) Codigo\ CAN.elf Codigo\ CAN.list Codigo\ CAN.map Codigo\\ CAN.elf default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

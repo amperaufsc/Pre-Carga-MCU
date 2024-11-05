@@ -31,7 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define RELAY_FIRST_PIN GPIO_PIN_6
+#define RELAY_FIRST_PIN GPIO_PIN_8
 #define RELAY_SECOND_PIN GPIO_PIN_7
 /* USER CODE END PD */
 

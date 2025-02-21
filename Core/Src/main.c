@@ -46,17 +46,12 @@ CAN_HandleTypeDef hcan;
 /* USER CODE BEGIN PV */
 CAN_HandleTypeDef hcan;
 HAL_StatusTypeDef hal_status;
-
-CAN_TxHeaderTypeDef txheader;
 CAN_RxHeaderTypeDef rxheader;
-uint8_t txdata[8];
 uint8_t rxdata[8];
-uint32_t txmailbox;
 HAL_StatusTypeDef get_status;
-
 uint16_t accumuladorVoltage;
 uint8_t inversorVoltage;
-
+int RecieveCanMSG = 0;
 
 /* USER CODE END PV */
 
@@ -74,24 +69,8 @@ static void MX_CAN_Init(void);
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 
-	get_status = HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxheader, rxdata);
-	if(get_status == HAL_OK){
-
-		switch(rxheader.StdId){
-
-		case 0x673: // Voltagem do Acumulador
-				accumuladorVoltage = ((rxdata[0] << 8) | (rxdata[1]));
-				break;
-
-		case 0x046: // Voltagem do Inversor
-						inversorVoltage = ((rxdata[1] << 8 ) | (rxdata[0]));
-						break;
-
-
-
-
-		}
-
+	if(HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxheader, rxdata) == HAL_OK){
+		RecieveCanMSG = 1;
 	}
 }
 /* USER CODE END 0 */
@@ -138,26 +117,30 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  txheader.IDE = CAN_ID_STD;
-	  txheader.RTR = CAN_RTR_DATA;
-	  txheader.StdId = 14;
-	  txheader.DLC = 1;
-	  txdata[0] = 10;
-	  if(HAL_CAN_AddTxMessage(&hcan, &txheader, txdata, &txmailbox) != HAL_OK){
-		  Error_Handler();}
-
-
-	  if(accumuladorVoltage == (0.9*inversorVoltage)){
-		  HAL_GPIO_WritePin(GPIOA, RELAY_FIRST_PIN, RESET); //Abre o relé da pré-carga//
-		  HAL_GPIO_WritePin(GPIOA, RELAY_SECOND_PIN, SET); //Fecha o relé direto do acumulador para o inversor//
-	  }
-	  }
-
-
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  if(RecieveCanMSG == 1){
+		switch(rxheader.StdId){
+
+		case 0x673: // Voltagem do Acumulador
+				accumuladorVoltage = rxdata[0];
+				break;
+
+		case 0x046: // Voltagem do Inversor
+						inversorVoltage = rxdata[2];
+						break;
+
+		}
+		RecieveCanMSG = 0;
+	  }
+
+
+	  if(accumuladorVoltage == (0.9*inversorVoltage)){
+		  HAL_GPIO_WritePin(GPIOC, RELAY_FIRST_PIN, RESET); //Abre o relé da pré-carga//
+		  HAL_GPIO_WritePin(GPIOC, RELAY_SECOND_PIN, SET); //Fecha o relé direto do acumulador para o inversor//
+	  }
+	  }
 
   /* USER CODE END 3 */
 }

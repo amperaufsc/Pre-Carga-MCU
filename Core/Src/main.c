@@ -134,9 +134,7 @@ int main(void)
 		}
 		RecieveCanMSG = 0;
 	  }
-
-
-	  if(accumuladorVoltage == (0.9*inversorVoltage)){
+	  if(inversorVoltage == (0.9*accumuladorVoltage)){
 		  HAL_GPIO_WritePin(GPIOC, RELAY_FIRST_PIN, RESET); //Abre o relé da pré-carga//
 		  HAL_GPIO_WritePin(GPIOC, RELAY_SECOND_PIN, SET); //Fecha o relé direto do acumulador para o inversor//
 	  }
